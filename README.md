@@ -1,4 +1,4 @@
-# 🔍 RepoShield Analyzer: Automated GitHub Secret Intelligence
+# RepoShield Analyzer: Automated GitHub Secret Intelligence
 
 
 A **FastAPI-based security tool** that automatically scans public GitHub repositories for sensitive information leaks — such as API keys, passwords, and credentials — using regex pattern matching and risk-based scoring.
