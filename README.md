@@ -1,7 +1,7 @@
 # RepoShield Analyzer: Automated GitHub Secret Intelligence
 
 
-A **FastAPI-based security tool** that automatically scans public GitHub repositories for sensitive information leaks — such as API keys, passwords, and credentials — using regex pattern matching and risk-based scoring.
+A **FastAPI-based security tool** that automatically scans public GitHub repositories for sensitive information leaks — such as API keys, passwords, and credentials.
 
 ---
 
@@ -19,7 +19,7 @@ A **FastAPI-based security tool** that automatically scans public GitHub reposit
 
 ## Overview
 
-Leaked secrets in source code (API keys, database passwords, access tokens) are one of the most common causes of security breaches. **GitHub Leak Scanner** addresses this by providing a REST API that:
+Leaked secrets in source code (API keys, database passwords, access tokens) are one of the most common causes of security breaches. **RepoShield Analyzer** addresses this by providing a REST API that:
 
 1. Accepts a GitHub repository URL.
 2. Downloads the repository as a ZIP archive.
@@ -27,7 +27,6 @@ Leaked secrets in source code (API keys, database passwords, access tokens) are 
 4. Stores all findings in a SQLite database with risk scores and severity levels.
 5. Exposes query endpoints to retrieve scan results.
 
-The entire scanning process runs **asynchronously in the background** using FastAPI's `BackgroundTasks`, so the API responds immediately while the scan happens behind the scenes.
 
 ---
 
