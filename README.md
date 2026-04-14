@@ -19,7 +19,7 @@ A **FastAPI-based security tool** that automatically scans public GitHub reposit
 
 ## Overview
 
-Leaked secrets in source code (API keys, database passwords, access tokens) are one of the most common causes of security breaches. **RepoShield Analyzer** addresses this by providing a REST API that:
+Leaked secrets in source code (API keys, database passwords, access tokens) are one of the most common causes of security breaches. **RepoShield-Analyzer** addresses this by providing a REST API that:
 
 1. Accepts a GitHub repository URL.
 2. Downloads the repository as a ZIP archive.
@@ -82,7 +82,7 @@ Leaked secrets in source code (API keys, database passwords, access tokens) are 
 ## Project Structure
 
 ```
-github-leak-scanner/
+RepoShield-Analyzer/
 │
 ├── main.py              
 ├── database.py         
@@ -104,8 +104,8 @@ github-leak-scanner/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/github-leak-scanner.git
-cd github-leak-scanner
+git clone https://github.com/jan08-ux/RepoShield-Analyzer.git
+cd RepoShield-Analyzer
 ```
 
 ### 2. Create a Virtual Environment
