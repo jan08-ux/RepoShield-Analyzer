@@ -3,7 +3,7 @@
 
 A **FastAPI-based security tool** that automatically scans public GitHub repositories for sensitive information leaks — such as API keys, passwords, and credentials.
 
----
+---  
 
 ## Table of Contents
 
