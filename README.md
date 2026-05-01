@@ -85,7 +85,7 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/SentinelScan.git
+git clone https://github.com/jan08-ux/SentinelScan.git
 cd SentinelScan
 ```
 
