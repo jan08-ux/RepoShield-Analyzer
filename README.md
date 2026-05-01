@@ -18,7 +18,6 @@ The tool downloads repositories, scans them line-by-line using optimized regex p
 
 | Feature | Description |
 |---|---|
-| **Premium Web UI** | Modern dark-mode dashboard built with Vanilla HTML/CSS/JS |
 | **Regex-based Detection** | Optimized patterns for AWS keys, generic API keys, and credentials |
 | **Real-time Status** | Live updates on scan progress via background task polling |
 | **Risk Scoring** | Automated calculation of risk (0.0–1.0) based on secret impact |
