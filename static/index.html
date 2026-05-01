@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentinelScan | GitHub Leak Scanner</title>
+    <meta name="description" content="Secure your code with SentinelScan. Detect API keys, passwords, and sensitive leaks in your GitHub repositories.">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dark-theme">
+    <div class="glow-bg"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-shield-halved"></i>
+                <span>Sentinel<span>Scan</span></span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active">Dashboard</a>
+                <a href="#about">About</a>
+                <a href="https://github.com" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Secure Your Repositories</h1>
+            <p>Paste your GitHub URL to scan for sensitive information leaks, API keys, and credentials.</p>
+            
+            <div class="scan-box">
+                <div class="input-group">
+                    <i class="fab fa-github"></i>
+                    <input type="text" id="repoUrl" placeholder="https://github.com/username/repo" aria-label="GitHub Repository URL">
+                    <button id="scanBtn">
+                        <span class="btn-text">Start Scan</span>
+                        <span class="btn-loader"><i class="fas fa-circle-notch fa-spin"></i></span>
+                    </button>
+                </div>
+                <div id="scanMsg" class="message"></div>
+            </div>
+        </section>
+
+        <section class="dashboard">
+            <div class="section-header">
+                <h2>Recent Scans</h2>
+                <button id="refreshBtn" class="btn-secondary"><i class="fas fa-sync-alt"></i> Refresh</button>
+            </div>
+            
+            <div class="repos-grid" id="reposGrid">
+                <!-- Skeleton loader -->
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Leak Details -->
+    <div id="leakModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Leaks Found</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="leakList" class="leak-list">
+                    <!-- Leaks will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 SentinelScan. Built for security-conscious developers.</p>
+        </div>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

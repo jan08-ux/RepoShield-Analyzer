@@ -1,198 +1,71 @@
-# 🔍 GitHub Leak Scanner
+# 🔍 SentinelScan | GitHub Leak Scanner
 
-A **FastAPI-based security tool** that automatically scans public GitHub repositories for sensitive information leaks — such as API keys, passwords, and credentials — using regex pattern matching and risk-based scoring.
+A **FastAPI-powered security tool** designed to automatically detect sensitive information leaks — such as API keys, passwords, and credentials — in public GitHub repositories. Now featuring a **premium, responsive web interface**.
 
 ---
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
-- [Installation & Setup](#installation--setup)
-- [API Endpoints](#api-endpoints)
-- [How the Scanner Works](#how-the-scanner-works)
-- [Database Schema](#database-schema)
-- [Risk Scoring & Severity](#risk-scoring--severity)
-- [Usage Examples](#usage-examples)
+- [✨ Key Features](#-key-features)
+- [🖥️ Web Interface](#-web-interface)
+- [🏗️ Architecture](#-architecture)
+- [🛠️ Tech Stack](#-tech-stack)
+- [🚀 Installation & Setup](#-installation--setup)
+- [📡 API Endpoints](#-api-endpoints)
+- [⚙️ How the Scanner Works](#-how-the-scanner-works)
+- [📊 Risk Scoring & Severity](#-risk-scoring--severity)
 
 ---
 
 ## 🧭 Overview
 
-Leaked secrets in source code (API keys, database passwords, access tokens) are one of the most common causes of security breaches. **GitHub Leak Scanner** addresses this by providing a REST API that:
+Leaked secrets in source code (AWS keys, database passwords, access tokens) are major security risks. **SentinelScan** provides an end-to-end solution to identify these leaks before they are exploited.
 
-1. Accepts a GitHub repository URL.
-2. Downloads the repository as a ZIP archive.
-3. Scans every relevant source file for sensitive patterns.
-4. Stores all findings in a SQLite database with risk scores and severity levels.
-5. Exposes query endpoints to retrieve scan results.
-
-The entire scanning process runs **asynchronously in the background** using FastAPI's `BackgroundTasks`, so the API responds immediately while the scan happens behind the scenes.
+The tool downloads repositories, scans them line-by-line using optimized regex patterns, and provides a real-time dashboard to visualize the findings. Everything runs **asynchronously** to ensure a smooth, non-blocking user experience.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
 | Feature | Description |
 |---|---|
-| **Regex-based detection** | Pre-built patterns for AWS keys, generic API keys, and database passwords |
-| **Risk scoring** | Each finding receives a risk score (0.0–1.0) based on the secret type |
-| **Severity classification** | Findings are classified as `LOW`, `MEDIUM`, `HIGH`, or `CRITICAL` |
-| **Background scanning** | Scans run asynchronously — the API returns immediately after triggering |
-| **Scan status tracking** | Track scan progress via `PENDING → SCANNING → COMPLETED / FAILED` states |
-| **Re-scan support** | Submitting the same URL clears old leaks and starts a fresh scan |
-| **Branch fallback** | Automatically tries `master` branch if `main` doesn't exist |
-| **Multi-format support** | Scans `.py`, `.js`, `.json`, `.env`, `.yml`, `.yaml`, `.txt`, `.md`, `.html` files |
-| **Interactive API docs** | Auto-generated Swagger UI at `/docs` |
+| **Premium Web UI** | Modern dark-mode dashboard built with Vanilla HTML/CSS/JS |
+| **Regex-based Detection** | Optimized patterns for AWS keys, generic API keys, and credentials |
+| **Real-time Status** | Live updates on scan progress via background task polling |
+| **Risk Scoring** | Automated calculation of risk (0.0–1.0) based on secret impact |
+| **Leak Inspector** | View exact file paths, line numbers, and code snippets of detected leaks |
+| **Background Scanning** | Non-blocking execution using FastAPI `BackgroundTasks` |
+| **Multi-format Support** | Scans `.py`, `.js`, `.json`, `.env`, `.yml`, `.txt`, and more |
+
+---
+
+## 🖥️ Web Interface
+
+The project now includes a stunning user interface served directly by the FastAPI backend.
+
+- **Dashboard**: Track all your repository scans in one place.
+- **Glassmorphism Design**: Modern aesthetics with vibrant gradients and dark mode.
+- **Interactive Findings**: Click on any completed scan to open a detailed modal containing all detected leaks.
+- **Polling Logic**: The UI automatically refreshes every 5 seconds to keep you updated on active scans.
 
 ---
 
 ## 🏗️ Architecture
 
+```mermaid
+graph TD
+    Client[Client Browser/API] -->|POST /scan| FastAPI[FastAPI Backend]
+    FastAPI -->|Immediate Response| Client
+    FastAPI -->|Schedule Task| BackgroundTask[Background Task]
+    BackgroundTask -->|Download ZIP| GitHub[GitHub API]
+    GitHub -->|ZIP File| BackgroundTask
+    BackgroundTask -->|Scan & Pattern Match| Scanner[Scanner Engine]
+    Scanner -->|Save Findings| DB[(SQLite Database)]
+    Client -->|GET /repos| FastAPI
+    FastAPI -->|Query Results| DB
+    DB -->|Data| Client
 ```
-┌─────────────┐       POST /scan        ┌──────────────────┐
-│   Client     │ ─────────────────────▶ │   FastAPI App     │
-│  (Browser /  │                        │   (main.py)       │
-│   curl)      │ ◀───────────────────── │                   │
-└─────────────┘   Immediate response    │  ┌─────────────┐  │
-                   (repo + PENDING)     │  │ scan.router  │  │
-                                        │  └──────┬──────┘  │
-                                        │         │         │
-                                        │  BackgroundTask   │
-                                        │         │         │
-                                        │  ┌──────▼──────┐  │
-                                        │  │  scanner.py  │──│──▶ GitHub (download ZIP)
-                                        │  │  (engine)    │  │
-                                        │  └──────┬──────┘  │
-                                        │         │         │
-                                        │  ┌──────▼──────┐  │
-                                        │  │ scanner.db   │  │
-                                        │  │  (SQLite)    │  │
-                                        │  └─────────────┘  │
-                                        └──────────────────┘
-
-                    GET /repos/*
-┌─────────────┐  ─────────────────────▶  ┌─────────────────┐
-│   Client     │                         │  repos.router    │──▶ Query DB
-│              │ ◀─────────────────────  │                  │
-└─────────────┘   JSON (repos/leaks)     └─────────────────┘
-```
-
-### Request Flow
-
-1. **Client** sends `POST /scan/` with a GitHub repo URL.
-2. **Scan Router** creates (or resets) the repository record in the DB with status `PENDING`, then schedules a background task.
-3. **Scanner Engine** (`scanner.py`) runs in the background:
-   - Downloads the repo as a ZIP from GitHub.
-   - Extracts it to a temp directory.
-   - Walks through all supported files, matching lines against regex patterns.
-   - For each match, calculates a risk score and severity, then saves a `Leak` record.
-   - Updates the repo status to `COMPLETED` (or `FAILED` on error).
-4. **Client** polls `GET /repos/{id}` or `GET /repos/{id}/leaks` to check results.
-
----
-
-## 📁 Project Structure
-
-```
-github-leak-scanner/
-│
-├── main.py              # FastAPI application entry point & router registration
-├── database.py          # SQLAlchemy engine, session factory, and Base declaration
-├── models.py            # ORM models (Repository, Leak) and enums (ScanStatus, SeverityLevel)
-├── schemas.py           # Pydantic schemas for request/response validation
-├── scanner.py           # Core scanning engine — download, extract, pattern match, score
-├── requirements.txt     # Python dependencies
-├── scanner.db           # SQLite database file (auto-created at runtime)
-│
-└── routers/
-    ├── scan.py          # POST /scan/ — trigger a new scan
-    └── repos.py         # GET /repos/ — query repositories and leaks
-```
-
-### File-by-File Breakdown
-
-#### `main.py` — Application Entry Point
-- Creates the FastAPI app instance with title `"GitHub Leak Scanner API"`.
-- Calls `models.Base.metadata.create_all()` to auto-create database tables on startup.
-- Registers the `scan` and `repos` routers.
-- Serves a root welcome endpoint at `GET /`.
-
-#### `database.py` — Database Configuration
-- Configures a **SQLite** database at `./scanner.db`.
-- Uses `check_same_thread=False` to allow multi-threaded access (required for background tasks).
-- Provides a `get_db()` dependency that yields a session and ensures cleanup via `finally`.
-
-#### `models.py` — SQLAlchemy ORM Models
-
-Two tables are defined:
-
-| Model | Table | Fields | Purpose |
-|---|---|---|---|
-| `Repository` | `repositories` | `id`, `url` (unique), `status` | Tracks each scanned repository and its scan state |
-| `Leak` | `leaks` | `id`, `repository_id` (FK), `file_path`, `line_number`, `snippet`, `secret_type`, `severity`, `risk_score` | Stores each detected secret with context |
-
-Two enums:
-- **`ScanStatus`**: `PENDING` → `SCANNING` → `COMPLETED` / `FAILED`
-- **`SeverityLevel`**: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
-
-#### `schemas.py` — Pydantic Validation Schemas
-
-| Schema | Type | Purpose |
-|---|---|---|
-| `RepositoryCreate` | Request | Validates incoming scan requests (expects an `HttpUrl`) |
-| `Repository` | Response | Full repository data including nested leaks |
-| `Leak` | Response | Individual leak finding with all metadata |
-
-All response schemas use `from_attributes = True` to enable ORM-mode serialization.
-
-#### `scanner.py` — Scanning Engine
-
-The heart of the application. It handles:
-
-1. **Pattern Definitions** — Three regex patterns:
-   - `AWS_KEY`: Matches AWS access key IDs (`AKIA` prefix + 16 alphanumeric chars).
-   - `GENERIC_API_KEY`: Matches `api_key=`, `apikey=`, or `secret=` followed by a quoted token (16+ chars).
-   - `DB_PASSWORD`: Matches `password=` or `passwd=` followed by a quoted value.
-
-2. **`fetch_and_scan(repo_id)`** — The main background task:
-   - Opens its own DB session (can't share the request's session across threads).
-   - Parses `owner/repo` from the GitHub URL using regex.
-   - Downloads the ZIP archive (tries `main` branch first, falls back to `master`).
-   - Extracts and recursively walks the directory.
-   - For each supported file, reads line-by-line and runs all patterns.
-   - Creates `Leak` records for every match with calculated risk and severity.
-
-3. **`calculate_risk()`** — Returns a risk score based on secret type:
-   - AWS keys → `0.95` (Critical)
-   - Generic API keys → `0.80` (High)
-   - Everything else → `0.50` (Medium)
-
-4. **`get_severity()`** — Maps risk score to severity level:
-   - `≥ 0.9` → `CRITICAL`
-   - `≥ 0.7` → `HIGH`
-   - `≥ 0.4` → `MEDIUM`
-   - `< 0.4` → `LOW`
-
-#### `routers/scan.py` — Scan Trigger Endpoint
-
-- `POST /scan/` — Accepts a JSON body with a `url` field.
-  - If the URL is new, creates a `Repository` record with `PENDING` status.
-  - If the URL already exists, resets its status to `PENDING` and **deletes all previous leaks** (re-scan).
-  - Schedules `fetch_and_scan()` as a `BackgroundTask`.
-  - Returns the repository object immediately.
-
-#### `routers/repos.py` — Query Endpoints
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/repos/` | GET | List all repositories (with pagination: `skip`, `limit`) |
-| `/repos/{repo_id}` | GET | Get a single repository by ID (includes nested leaks) |
-| `/repos/{repo_id}/leaks` | GET | Get all leaks for a specific repository |
-| `/repos/leaks/all` | GET | List all leaks across all repositories (with pagination) |
 
 ---
 
@@ -200,273 +73,78 @@ The heart of the application. It handles:
 
 | Component | Technology |
 |---|---|
-| Web Framework | [FastAPI](https://fastapi.tiangolo.com/) 0.110.0 |
-| ASGI Server | [Uvicorn](https://www.uvicorn.org/) 0.27.1 |
-| Validation | [Pydantic](https://docs.pydantic.dev/) 2.6.3 |
-| ORM | [SQLAlchemy](https://www.sqlalchemy.org/) 2.0.28 |
-| Database | SQLite (via SQLAlchemy) |
-| HTTP Client | `urllib.request` (stdlib) |
-| Language | Python 3.10+ |
+| **Backend** | [FastAPI](https://fastapi.tiangolo.com/) |
+| **Frontend** | Vanilla HTML5, CSS3 (Modern Dark Mode), JavaScript (ES6+) |
+| **Database** | SQLite with [SQLAlchemy](https://www.sqlalchemy.org/) ORM |
+| **Asynchronous** | FastAPI `BackgroundTasks` + `aiofiles` |
+| **Styling** | Google Fonts (Outfit, JetBrains Mono), Font Awesome |
 
 ---
 
 ## 🚀 Installation & Setup
 
 ### 1. Clone the Repository
-
 ```bash
-git clone https://github.com/<your-username>/github-leak-scanner.git
-cd github-leak-scanner
+git clone https://github.com/your-username/SentinelScan.git
+cd SentinelScan
 ```
 
-### 2. Create a Virtual Environment
-
+### 2. Setup Virtual Environment
 ```bash
 python -m venv venv
-
-# Windows
+# Windows:
 venv\Scripts\activate
-
-# macOS / Linux
+# macOS/Linux:
 source venv/bin/activate
 ```
 
 ### 3. Install Dependencies
-
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run the Server
-
+### 4. Run the Application
 ```bash
 uvicorn main:app --reload
 ```
 
-The server starts at **http://127.0.0.1:8000**.
-
-### 5. Open the API Docs
-
-Navigate to **http://127.0.0.1:8000/docs** — FastAPI auto-generates an interactive Swagger UI where you can test all endpoints.
+The application will be available at:
+- **Web Interface**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **API Documentation**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
 ## 📡 API Endpoints
 
-### Trigger a Scan
-
-```http
-POST /scan/
-Content-Type: application/json
-
-{
-  "url": "https://github.com/owner/repo-name"
-}
-```
-
-**Response** (immediate):
-```json
-{
-  "id": 1,
-  "url": "https://github.com/owner/repo-name",
-  "status": "PENDING",
-  "leaks": []
-}
-```
-
-### List All Repositories
-
-```http
-GET /repos/?skip=0&limit=100
-```
-
-### Get a Specific Repository
-
-```http
-GET /repos/1
-```
-
-**Response** (after scan completes):
-```json
-{
-  "id": 1,
-  "url": "https://github.com/owner/repo-name",
-  "status": "COMPLETED",
-  "leaks": [
-    {
-      "id": 1,
-      "repository_id": 1,
-      "file_path": "/repo-name-main/config.py",
-      "line_number": 12,
-      "snippet": "AWS_ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE'",
-      "secret_type": "AWS_KEY",
-      "severity": "CRITICAL",
-      "risk_score": 0.95
-    }
-  ]
-}
-```
-
-### Get Leaks for a Repository
-
-```http
-GET /repos/1/leaks
-```
-
-### Get All Leaks (Global)
-
-```http
-GET /repos/leaks/all?skip=0&limit=100
-```
-
----
-
-## ⚙️ How the Scanner Works
-
-```
-GitHub URL  ──▶  Parse owner/repo  ──▶  Download ZIP (main → master fallback)
-                                              │
-                                              ▼
-                                     Extract to temp dir
-                                              │
-                                              ▼
-                                    Walk all supported files
-                                   (.py, .js, .json, .env, etc.)
-                                              │
-                                              ▼
-                                  For each line in each file:
-                                   ┌─ Match AWS_KEY pattern
-                                   ├─ Match GENERIC_API_KEY pattern
-                                   └─ Match DB_PASSWORD pattern
-                                              │
-                                       On match found:
-                                              │
-                                              ▼
-                                   calculate_risk(secret_type)
-                                              │
-                                              ▼
-                                   get_severity(risk_score)
-                                              │
-                                              ▼
-                                   Save Leak record to DB
-                                              │
-                                              ▼
-                                  Update repo status → COMPLETED
-```
-
-### Detection Patterns
-
-| Pattern Name | Regex | What it Catches |
+| Method | Endpoint | Description |
 |---|---|---|
-| `AWS_KEY` | `AKIA[0-9A-Z]{16}` | AWS Access Key IDs (always start with `AKIA`) |
-| `GENERIC_API_KEY` | `(?:api_key\|apikey\|secret)[=:]\s*["']([a-zA-Z0-9_\-\.]{16,})["']` | API keys and secrets assigned in code |
-| `DB_PASSWORD` | `(?:password\|passwd)[=:]\s*["'](.*?)["']` | Database passwords and credentials |
-
-All patterns are case-insensitive.
-
----
-
-## 🗄️ Database Schema
-
-```
-┌────────────────────────┐       ┌────────────────────────────────┐
-│     repositories       │       │            leaks               │
-├────────────────────────┤       ├────────────────────────────────┤
-│ id      INTEGER (PK)   │───┐   │ id              INTEGER (PK)   │
-│ url     STRING (UNIQUE) │   │   │ repository_id   INTEGER (FK)   │
-│ status  ENUM           │   └──▶│ file_path       STRING         │
-│          (PENDING,     │       │ line_number     INTEGER        │
-│           SCANNING,    │       │ snippet         STRING         │
-│           COMPLETED,   │       │ secret_type     STRING         │
-│           FAILED)      │       │ severity        ENUM           │
-└────────────────────────┘       │                 (LOW, MEDIUM,  │
-                                 │                  HIGH, CRITICAL)│
-                                 │ risk_score      FLOAT          │
-                                 └────────────────────────────────┘
-```
-
-**Relationship**: One Repository → Many Leaks (one-to-many via `repository_id` foreign key).
+| `POST` | `/scan/` | Trigger a new repository scan |
+| `GET` | `/repos/` | List all scanned repositories |
+| `GET` | `/repos/{id}` | Get detailed info for a specific repo |
+| `GET` | `/repos/{id}/leaks` | Get all findings for a specific repo |
+| `GET` | `/repos/leaks/all` | Global list of all detected leaks |
 
 ---
 
 ## 📊 Risk Scoring & Severity
 
-### Risk Score Assignment
-
-| Secret Type | Risk Score | Rationale |
+| Secret Type | Risk Score | Severity Level |
 |---|---|---|
-| `AWS_KEY` | **0.95** | AWS keys grant direct cloud infrastructure access |
-| `GENERIC_API_KEY` | **0.80** | API keys can expose services and data |
-| `DB_PASSWORD` | **0.50** | Passwords may be placeholders or dev-only |
-
-### Severity Thresholds
-
-| Risk Score Range | Severity Level |
-|---|---|
-| `≥ 0.90` | 🔴 **CRITICAL** |
-| `0.70 – 0.89` | 🟠 **HIGH** |
-| `0.40 – 0.69` | 🟡 **MEDIUM** |
-| `< 0.40` | 🟢 **LOW** |
+| **AWS Access Key** | 0.95 | 🔴 **CRITICAL** |
+| **API/Secret Key** | 0.80 | 🟠 **HIGH** |
+| **DB Password** | 0.50 | 🟡 **MEDIUM** |
+| **Other Credentials** | < 0.40 | 🟢 **LOW** |
 
 ---
 
-## 💡 Usage Examples
+## 📁 Project Structure
 
-### Using `curl`
-
-**Trigger a scan:**
-```bash
-curl -X POST http://127.0.0.1:8000/scan/ \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://github.com/octocat/Hello-World"}'
-```
-
-**Check scan results:**
-```bash
-curl http://127.0.0.1:8000/repos/1
-```
-
-**Get all leaks:**
-```bash
-curl http://127.0.0.1:8000/repos/leaks/all
-```
-
-### Using Python `requests`
-
-```python
-import requests
-import time
-
-# Trigger scan
-response = requests.post(
-    "http://127.0.0.1:8000/scan/",
-    json={"url": "https://github.com/octocat/Hello-World"}
-)
-repo = response.json()
-print(f"Scan triggered — Repo ID: {repo['id']}, Status: {repo['status']}")
-
-# Poll until complete
-while True:
-    time.sleep(5)
-    result = requests.get(f"http://127.0.0.1:8000/repos/{repo['id']}").json()
-    print(f"Status: {result['status']}")
-    if result["status"] in ("COMPLETED", "FAILED"):
-        break
-
-# Print findings
-for leak in result["leaks"]:
-    print(f"[{leak['severity']}] {leak['secret_type']} in {leak['file_path']}:{leak['line_number']}")
-    print(f"  Snippet: {leak['snippet']}")
-    print(f"  Risk: {leak['risk_score']}")
-```
+- `main.py`: App entry point and static file routing.
+- `scanner.py`: Core detection engine and background logic.
+- `static/`: HTML, CSS, and JS frontend files.
+- `routers/`: API route definitions.
+- `models.py` / `schemas.py`: Data structure and validation.
 
 ---
 
-## 📝 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
-**Disclaimer**: This project is for educational and internal security auditing purposes. Always obtain proper authorization before scanning repositories you do not own.
-
+**Disclaimer**: This tool is for educational purposes and internal security auditing. Ensure you have permission to scan repositories that do not belong to you.
