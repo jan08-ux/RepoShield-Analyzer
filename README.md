@@ -1,21 +1,10 @@
-# 🔍 RepoShield-Analyzer | GitHub Secret Intelligence
+# RepoShield-Analyzer | GitHub Secret Intelligence
 
-A **FastAPI-powered security tool** designed to automatically detect sensitive information leaks — such as API keys, passwords, and credentials — in public GitHub repositories. Now featuring a **premium, responsive web interface**.
-
----
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#-key-features)
-- [Web Interface](#-web-interface)
-- [🏗️ Architecture](#-architecture)
-- [Installation & Setup](#-installation--setup)
-- [📡 API Endpoints](#-api-endpoints)
-- [⚙️ How the Scanner Works](#-how-the-scanner-works)
-- [📊 Risk Scoring & Severity](#-risk-scoring--severity)
+A **FastAPI-powered security tool** designed to automatically detect sensitive information leaks — such as API keys, passwords, and credentials — in public GitHub repositories with  responsive web interface.
 
 ---
+
+
 
 ## Overview
 
@@ -50,27 +39,6 @@ The project now includes a stunning user interface served directly by the FastAP
 
 ---
 
-##  Architecture
-
-```mermaid
-graph TD
-    Client[Client Browser/API] -->|POST /scan| FastAPI[FastAPI Backend]
-    FastAPI -->|Immediate Response| Client
-    FastAPI -->|Schedule Task| BackgroundTask[Background Task]
-    BackgroundTask -->|Download ZIP| GitHub[GitHub API]
-    GitHub -->|ZIP File| BackgroundTask
-    BackgroundTask -->|Scan & Pattern Match| Scanner[Scanner Engine]
-    Scanner -->|Save Findings| DB[(SQLite Database)]
-    Client -->|GET /repos| FastAPI
-    FastAPI -->|Query Results| DB
-    DB -->|Data| Client
-```
-
----
-
-
-
----
 
 ## Installation & Setup
 
