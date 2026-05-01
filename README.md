@@ -1,4 +1,4 @@
-# 🔍 SentinelScan | GitHub Leak Scanner
+# 🔍 RepoShield-Analyzer | GitHub Secret Intelligence
 
 A **FastAPI-powered security tool** designed to automatically detect sensitive information leaks — such as API keys, passwords, and credentials — in public GitHub repositories. Now featuring a **premium, responsive web interface**.
 
@@ -20,7 +20,7 @@ A **FastAPI-powered security tool** designed to automatically detect sensitive i
 
 ## 🧭 Overview
 
-Leaked secrets in source code (AWS keys, database passwords, access tokens) are major security risks. **SentinelScan** provides an end-to-end solution to identify these leaks before they are exploited.
+Leaked secrets in source code (AWS keys, database passwords, access tokens) are major security risks. **RepoShield-Analyzer** provides an end-to-end solution to identify these leaks before they are exploited.
 
 The tool downloads repositories, scans them line-by-line using optimized regex patterns, and provides a real-time dashboard to visualize the findings. Everything runs **asynchronously** to ensure a smooth, non-blocking user experience.
 
@@ -85,8 +85,8 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/jan08-ux/SentinelScan.git
-cd SentinelScan
+git clone https://github.com/jan08-ux/RepoShield-Analyzer.git
+cd RepoShield-Analyzer
 ```
 
 ### 2. Setup Virtual Environment

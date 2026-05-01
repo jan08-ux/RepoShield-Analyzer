@@ -9,7 +9,7 @@ import os
 # Initialize DB tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="GitHub Leak Scanner API", version="1.0.0")
+app = FastAPI(title="RepoShield-Analyzer API", version="1.0.0")
 
 # Mount static files
 if not os.path.exists("static"):
