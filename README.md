@@ -7,18 +7,17 @@ A **FastAPI-powered security tool** designed to automatically detect sensitive i
 ## 📋 Table of Contents
 
 - [Overview](#overview)
-- [✨ Key Features](#-key-features)
-- [🖥️ Web Interface](#-web-interface)
+- [Features](#-key-features)
+- [Web Interface](#-web-interface)
 - [🏗️ Architecture](#-architecture)
-- [🛠️ Tech Stack](#-tech-stack)
-- [🚀 Installation & Setup](#-installation--setup)
+- [Installation & Setup](#-installation--setup)
 - [📡 API Endpoints](#-api-endpoints)
 - [⚙️ How the Scanner Works](#-how-the-scanner-works)
 - [📊 Risk Scoring & Severity](#-risk-scoring--severity)
 
 ---
 
-## 🧭 Overview
+## Overview
 
 Leaked secrets in source code (AWS keys, database passwords, access tokens) are major security risks. **RepoShield-Analyzer** provides an end-to-end solution to identify these leaks before they are exploited.
 
@@ -26,7 +25,7 @@ The tool downloads repositories, scans them line-by-line using optimized regex p
 
 ---
 
-## ✨ Key Features
+## Features
 
 | Feature | Description |
 |---|---|
@@ -40,7 +39,7 @@ The tool downloads repositories, scans them line-by-line using optimized regex p
 
 ---
 
-## 🖥️ Web Interface
+## Web Interface
 
 The project now includes a stunning user interface served directly by the FastAPI backend.
 
@@ -51,7 +50,7 @@ The project now includes a stunning user interface served directly by the FastAP
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```mermaid
 graph TD
@@ -69,19 +68,11 @@ graph TD
 
 ---
 
-## 🛠️ Tech Stack
 
-| Component | Technology |
-|---|---|
-| **Backend** | [FastAPI](https://fastapi.tiangolo.com/) |
-| **Frontend** | Vanilla HTML5, CSS3 (Modern Dark Mode), JavaScript (ES6+) |
-| **Database** | SQLite with [SQLAlchemy](https://www.sqlalchemy.org/) ORM |
-| **Asynchronous** | FastAPI `BackgroundTasks` + `aiofiles` |
-| **Styling** | Google Fonts (Outfit, JetBrains Mono), Font Awesome |
 
 ---
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -114,7 +105,7 @@ The application will be available at:
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -126,7 +117,7 @@ The application will be available at:
 
 ---
 
-## 📊 Risk Scoring & Severity
+## Risk Scoring & Severity
 
 | Secret Type | Risk Score | Severity Level |
 |---|---|---|
@@ -137,13 +128,6 @@ The application will be available at:
 
 ---
 
-## 📁 Project Structure
-
-- `main.py`: App entry point and static file routing.
-- `scanner.py`: Core detection engine and background logic.
-- `static/`: HTML, CSS, and JS frontend files.
-- `routers/`: API route definitions.
-- `models.py` / `schemas.py`: Data structure and validation.
 
 ---
 
