@@ -93,8 +93,6 @@ The application will be available at:
 | **DB Password** | 0.50 | 🟡 **MEDIUM** |
 | **Other Credentials** | < 0.40 | 🟢 **LOW** |
 
----
-
 
 ---
 
